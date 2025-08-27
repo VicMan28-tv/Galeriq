@@ -18,25 +18,29 @@ jobs:
   build:
     runs-on: ubuntu-latest
     steps:
-      - name: Checkout código
+      - name: Checkout
         uses: actions/checkout@v4
 
-      - name: Configurar Node.js
+      - name: Setup Node
         uses: actions/setup-node@v4
         with:
           node-version: "20"
           cache: "npm"
 
-      - name: Instalar dependencias
+      - name: Install deps
         run: npm ci || npm install
 
-      - name: Compilar el proyecto
+      - name: Build (Vite)
         run: |
           npm run build
-          # 👇 Esto es por si usas React Router (evita errores 404 al refrescar)
+          # Fallback para React Router (opcional, pero recomendable)
           cp dist/index.html dist/404.html
 
-      - name: Subir archivos compilados
+      # 👇 Paso clave para Pages
+      - name: Configure Pages
+        uses: actions/configure-pages@v5
+
+      - name: Upload artifact
         uses: actions/upload-pages-artifact@v3
         with:
           path: ./dist
@@ -48,6 +52,6 @@ jobs:
     needs: build
     runs-on: ubuntu-latest
     steps:
-      - name: Publicar en GitHub Pages
+      - name: Deploy to GitHub Pages
         id: deployment
         uses: actions/deploy-pages@v4
